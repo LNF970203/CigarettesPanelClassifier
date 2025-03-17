@@ -8,7 +8,7 @@ from keras.applications.resnet import preprocess_input
 import pickle
 
 
-IMAGE_ADDRESS = "https://media.cnn.com/api/v1/images/stellar/prod/230901070411-02-menthol-cigarettes-file.jpg?c=original"
+IMAGE_ADDRESS = "panograms.jpeg"
 IMAGE_NAME = "user_uploaded_image.png"
 IMG_SIZE = (224, 224)
 LABELS = ["Correct", "Incorrect"]
@@ -55,22 +55,44 @@ cp_model = load_sklearn_models("mobilenet_best_model")
 st.title("Cigarettes Panel Classifer")
 st.image(IMAGE_ADDRESS)
 
-# camera input
-st.subheader("Cpature an Image 📷")
+tab_one, tab_two = st.tabs(["File Upload", "Camera Input"])
 
-camera_photo = st.camera_input("Capture an Image")
+with tab_one:
+    # file uploader
+    image = st.file_uploader("Please Upload an Image", type = ["jpg", "png", "jpeg"], accept_multiple_files = False, help = "Uploade an Image")
 
-if camera_photo:
-    user_image = Image.open(camera_photo)
-    # save the image to set the path
-    user_image.save(IMAGE_NAME)
-    # set the user image
-    st.subheader("Captured Image")
-    st.image(user_image, caption = "User Uploaded Image")
+    if image:
+        user_image = Image.open(image)
+        # save the image to set the path
+        user_image.save(IMAGE_NAME)
+        # set the user image
+        st.image(user_image, caption = "User Uploaded Image")
 
-    with st.spinner("Processing......."):
-        image_features = featurization(IMAGE_NAME, mobilenet_featurized_model)
-        model_predict = cp_model.predict(image_features)
-        #predictions
-        st.subheader("Predictions")
-        st.markdown("**Order of the Cigarette Panel: {}**".format(LABELS[model_predict[0]]))
+        #get the features
+        with st.spinner("Processing......."):
+            image_features_ = featurization(IMAGE_NAME, mobilenet_featurized_model)
+            model_predict_ = cp_model.predict(image_features_)
+            print(model_predict_)
+            st.subheader("Predictions")
+            st.markdown("**Order of the Cigarette Panel: {}**".format(LABELS[model_predict_[0]]))
+
+with tab_two:
+    # camera input
+    st.subheader("Cpature an Image 📷")
+
+    camera_photo = st.camera_input("Capture an Image")
+
+    if camera_photo:
+        user_image = Image.open(camera_photo)
+        # save the image to set the path
+        user_image.save(IMAGE_NAME)
+        # set the user image
+        st.subheader("Captured Image")
+        st.image(user_image, caption = "User Uploaded Image")
+
+        with st.spinner("Processing......."):
+            image_features = featurization(IMAGE_NAME, mobilenet_featurized_model)
+            model_predict = cp_model.predict(image_features)
+            #predictions
+            st.subheader("Predictions")
+            st.markdown("**Order of the Cigarette Panel: {}**".format(LABELS[model_predict[0]]))
